@@ -53,10 +53,12 @@ private:
 	string		route_trip_prefix;
 	int			route_trip_start;
 	int			route_trip_num;
+	int 		route_trip_divide_num;
 
 	int			route_edge_range_base;
 	int			route_edge_range_max;
 	string		route_edge_start;
+
 
 	int			route_vehi_prefix;
 	int			route_vehi_num;

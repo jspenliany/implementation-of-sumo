@@ -22,11 +22,11 @@ const static char digits[11] = {'0','1','2','3','4','5','6','7','8','9','\0'};
 const static string key_Input[7] = {"____","**","__node__","__edge__","__route__","__file__"};
 const static string key_node[12] = { "node_prefix","rowc","colc","xmax","ymax","axis_type","radius","xstart","ystart","base_start","junc_type","junc_width"};
 const static string key_edge[4] = {"lanes","bidirection","connectivity","edge_prefix"};
-const static string key_route[21] = {
+const static string key_route[22] = {
 					"vtype_prefix","vtype_num", "vtype_accel", "vtype_decel",   "vtype_length", "vtype_Maxspeed","vtype_width","vtype_sigma",
 					"trip_prefix", "trip_index","trip_num",    "edge_rangeBase","edge_rangeMax","edge_start",
 					"vehi_prefix", "vehi_num",  "vehi_types",  "vehi_routes",   "vehi_depart",  "vehi_color",
-					"poisson_lambda"};
+					"poisson_lambda","trip_divide_num"};
 const static string key_file[5] = {"name","node_xml","edge_xml","route_xml","base_xml"};
 
 const static string nodeTypeStr[11]={"priority",
@@ -348,6 +348,8 @@ ScenGene::routePara(int index){
 		route_vehi_color_bits = atoi(para_value_one.c_str());break;
 	case 20:
 		lambda = atoi(para_value_one.c_str());break;
+	case 21:
+		route_trip_divide_num = atoi(para_value_one.c_str());break;
 	default:
 		cout<<" ERROR exists in routePara..."<<endl;
 	}
@@ -450,7 +452,7 @@ ScenGene::printPara(){
 	}
 	cout<<endl;
 	cout<<"route parameters lists:"<<endl;
-	for(int i = 0; i < 21; i++){
+	for(int i = 0; i < 22; i++){
 		cout<<"**\t"<<key_route[i]<<" ";
 		switch(i){
 		case 0:
@@ -518,6 +520,8 @@ ScenGene::printPara(){
 			cout<<route_vehi_color_bits;break;
 		case 20:
 			cout<<lambda;break;
+		case 21:
+			cout<<route_trip_divide_num;break;
 		default:
 			cout<<" ERROR exists in route printPara..."<<endl;
 
@@ -720,7 +724,7 @@ void
 ScenGene::file_nodxml(){
 	double xstep = 0.0;
 	double ystep = 0.0;
-	double zstep = 0.0;
+//	double zstep = 0.0;
 	double xstart = node_xstart;
 	double ystart = node_ystart;
 	double Xlength = scen_xlength - xstart * 2;
@@ -742,7 +746,7 @@ ScenGene::file_nodxml(){
 
 	int   idcharLen = 6;
 
-	char  tmp_Result[(rowC * colC + rowC) * idcharLen + 1];
+//	char  tmp_Result[(rowC * colC + rowC) * idcharLen + 1];
 
 	if(node_axis_type_bits == 7){// x same step, y same step
 		xstep = Xlength / (colC - 1);
@@ -975,10 +979,10 @@ ScenGene::file_edgxml(){
 
 				strtmp<<"\" numLanes=\""<<edge_lane_num<<"\" > </edge>";
 
-				edge_id(ri,cj,ni,nj);
-				edge_ft(ri,cj,ni,nj);
-				edge_lanes(edge_lane_num);
-				edge_finishLine();
+//				edge_id(ri,cj,ni,nj);
+//				edge_ft(ri,cj,ni,nj);
+//				edge_lanes(edge_lane_num);
+//				edge_finishLine();
 				//id(ri,cj,ni,nj);
 				//ft(ri,cj,ni,nj);
 				//lanes(1);
@@ -1192,6 +1196,24 @@ ScenGene::file_rouxml(){
 
 	 printf("\n");
 	for(;ti < rc; ti++){// the number of trips
+
+		//random edge start
+		if(ti % (route_trip_num / (route_trip_divide_num-1)) == (route_trip_num / (route_trip_divide_num-1)) - 1){
+			int tmp_Random_row = rand() % node_rowc + 1;
+			int tmp_Random_col = rand() % node_colc + 1;
+
+			fromjunc[0] = tmp_Random_row / 100;
+			fromjunc[1] = (tmp_Random_row % 100) / 10;
+			fromjunc[2] = tmp_Random_row % 10;
+
+			fromjunc[3] = tmp_Random_col / 100;
+			fromjunc[4] = (tmp_Random_col % 100) / 10;
+			fromjunc[5] = tmp_Random_col % 10;
+		}
+
+
+
+
 		int cc = rand() % route_edge_range_max + route_edge_range_base;
 
 		Trips[ti][0] = cc;//the number of edges
@@ -1792,14 +1814,17 @@ ScenGene::writeXML(string fname, char openmode, string cont){
 		paraFile<<cont.c_str()<<endl;
 		paraFile.flush();
 		paraFile.close();
+		return true;
 	}else if(openmode == '0'){
 		ofstream paraFile(foutput_name,ios::out);//clear & write
 		cout<<" writeXML out  ...."<<endl;
 		paraFile<<cont.c_str()<<endl;
 		paraFile.flush();
 		paraFile.close();
+		return true;
 	}else{
 		cout<<" writeXML openmode  ERROR"<<endl;
+		return false;
 	}
 }
 
