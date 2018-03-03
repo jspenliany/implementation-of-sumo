@@ -80,6 +80,8 @@ private:
 	string		settingFile;
 	string		cfgFile;
 	string  	baseFile;
+	string  	wiredFile;
+	string		patternFile;
 
 //parse----------------------para & value
 	string		current_line;
@@ -88,23 +90,33 @@ private:
 	string		para_value_two;
 
 
-
+//base-stations-----------------------
 	//the following are for base station generation
 	double** base_loc;
 	double base_xstep;
 	double base_ystep;
+	int		base_startIndex;
+
+//wired-nodes--------------------------
+	int  wired_junc_only;
+	double wired_xdist_base;
+	double wired_ydist_base;
+
+
+
+//inner variables----------------------------
+	int vehibases_num;
 
 //	ofstream file_handle;
 private:
-	void readNODEpara(int);
-	void readEDGEpara(int);
-	void readROUTpara(int);
+
 	void parseLine(int type,int index);
 	void parseValue(int type,int index);
 	void nodePara(int);
 	void edgePara(int);
 	void routePara(int);
 	void filePara(int);
+	void wiredPara(int);
 
 
 	void edge_id(int,int,int,int);
@@ -126,12 +138,16 @@ private:
 	void nodeXML(string);
 	void edgeXML(string);
 	void routeXML(string);
+	void baseStationTCL(string);
+	void wiredNodeTCL(string);
+	void patternTCL(string);
 
 	bool check_valid(int,int,int);
 	void parseJunc(char*, int[]);
 
 	void generatePoisson(int[]);
 	int  poissonNextElement();
+
 
 
 
@@ -142,6 +158,9 @@ public:
 	void file_nodxml();
 	void file_edgxml();
 	void file_rouxml();
+	void file_bastcl();
+	void file_wirtcl();
+	void file_pattcl();
 
 
 };
