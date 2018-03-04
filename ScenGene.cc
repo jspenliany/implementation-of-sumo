@@ -1550,7 +1550,7 @@ ScenGene::file_rouxml(){
 void
 ScenGene::file_bastcl(){
 
-	base_startIndex = route_vehi_num;//NO. is start from the id of the vehicular
+	base_startIndex = 0;//NO. is start from the id of the vehicular
 
 	std::ostringstream strtmp;
 	strtmp<<"\n";
@@ -1595,25 +1595,25 @@ ScenGene::file_bastcl(){
 				printf("%d",(base_startIndex + ri - 1));
 				printf(") set X_ %0.4f\n",base_loc[0][ri]);
 
-				strtmp<<"$node_("<<(base_startIndex + ri - 1)<<") set X_ "<<base_loc[0][ri]<<"\n";
+				strtmp<<"$nodeb_("<<(base_startIndex + ri - 1)<<") set X_ "<<base_loc[0][ri]<<"\n";
 
 				printf("$node_(");
 				printf("%d",(base_startIndex + ri - 1));
 				printf(") set Y_ %0.4f\n",base_loc[1][ri]);
 
-				strtmp<<"$node_("<<(base_startIndex + ri - 1)<<") set Y_ "<<base_loc[1][ri]<<"\n";
+				strtmp<<"$nodeb_("<<(base_startIndex + ri - 1)<<") set Y_ "<<base_loc[1][ri]<<"\n";
 
 				printf("$node_(");
 				printf("%d",(base_startIndex + ri - 1));
 				printf(") set Z_ %0.4f\n",base_loc[2][ri]);
 
-				strtmp<<"$node_("<<(base_startIndex + ri - 1)<<") set Z_ "<<base_loc[2][ri]<<"\n";
+				strtmp<<"$nodeb_("<<(base_startIndex + ri - 1)<<") set Z_ "<<base_loc[2][ri]<<"\n";
 
 				printf("$node_(");
 				printf("%d",(base_startIndex + ri - 1));
 				printf(") color \"blue\"\n");
 
-				strtmp<<"$node_("<<(base_startIndex + ri - 1)<<") color \"blue\"\n";
+				strtmp<<"$nodeb_("<<(base_startIndex + ri - 1)<<") color \"blue\"\n";
 			}
 
 
@@ -1637,25 +1637,25 @@ ScenGene::file_bastcl(){
 						printf("%d",(base_startIndex + Base_Num - 1 + New_Index));
 						printf(") set X_ %0.4f\n",base_loc[0][(ri - 1) * Base_colc + cj] + bi * base_cxstep);
 
-						strtmp<<"$node_("<<(base_startIndex + Base_Num - 1 + New_Index)<<") set X_ "<<base_loc[0][(ri - 1) * Base_colc + cj] + bi * base_cxstep<<"\n";
+						strtmp<<"$nodeb_("<<(base_startIndex + Base_Num - 1 + New_Index)<<") set X_ "<<base_loc[0][(ri - 1) * Base_colc + cj] + bi * base_cxstep<<"\n";
 
 						printf("$node_(");
 						printf("%d",(base_startIndex + Base_Num - 1 + New_Index));
 						printf(") set Y_ %0.4f\n",base_loc[1][(ri - 1) * Base_colc + cj]);
 
-						strtmp<<"$node_("<<(base_startIndex + Base_Num - 1 + New_Index)<<") set Y_ "<<base_loc[1][(ri - 1) * Base_colc + cj]<<"\n";
+						strtmp<<"$nodeb_("<<(base_startIndex + Base_Num - 1 + New_Index)<<") set Y_ "<<base_loc[1][(ri - 1) * Base_colc + cj]<<"\n";
 
 						printf("$node_(");
 						printf("%d",(base_startIndex + Base_Num - 1 + New_Index));
 						printf(") set Z_ %0.4f\n",base_loc[2][(ri - 1) * Base_colc + cj]);
 
-						strtmp<<"$node_("<<(base_startIndex + Base_Num - 1 + New_Index)<<") set Z_ "<<base_loc[2][(ri - 1) * Base_colc + cj]<<"\n";
+						strtmp<<"$nodeb_("<<(base_startIndex + Base_Num - 1 + New_Index)<<") set Z_ "<<base_loc[2][(ri - 1) * Base_colc + cj]<<"\n";
 
 						printf("$node_(");
 						printf("%d",(base_startIndex + Base_Num - 1 + New_Index));
 						printf(") color \"red\"\n");
 
-						strtmp<<"$node_("<<(base_startIndex + Base_Num - 1 + New_Index)<<") color \"red\"\n";
+						strtmp<<"$nodeb_("<<(base_startIndex + Base_Num - 1 + New_Index)<<") color \"red\"\n";
 
 					}
 
@@ -1673,25 +1673,25 @@ ScenGene::file_bastcl(){
 						printf("%d",(base_startIndex + Base_Num - 1 + New_Index));
 						printf(") set X_ %0.4f\n",base_loc[0][(ri - 1) * Base_colc + cj]);
 
-						strtmp<<"$node_("<<(base_startIndex + Base_Num - 1 + New_Index)<<") set X_ "<<base_loc[0][(ri - 1) * Base_colc + cj]<<"\n";
+						strtmp<<"$nodeb_("<<(base_startIndex + Base_Num - 1 + New_Index)<<") set X_ "<<base_loc[0][(ri - 1) * Base_colc + cj]<<"\n";
 
 						printf("$node_(");
 						printf("%d",(base_startIndex + Base_Num - 1 + New_Index));
 						printf(") set Y_ %0.4f\n",base_loc[1][(ri - 1) * Base_colc + cj] + bi * base_cystep);
 
-						strtmp<<"$node_("<<(base_startIndex + Base_Num - 1 + New_Index)<<") set Y_ "<<base_loc[1][(ri - 1) * Base_colc + cj] + bi * base_cystep<<"\n";
+						strtmp<<"$nodeb_("<<(base_startIndex + Base_Num - 1 + New_Index)<<") set Y_ "<<base_loc[1][(ri - 1) * Base_colc + cj] + bi * base_cystep<<"\n";
 
 						printf("$node_(");
 						printf("%d",(base_startIndex + Base_Num - 1 + New_Index));
 						printf(") set Z_ %0.4f\n",base_loc[2][(ri - 1) * Base_colc + cj]);
 
-						strtmp<<"$node_("<<(base_startIndex + Base_Num - 1 + New_Index)<<") set Z_ "<<base_loc[2][(ri - 1) * Base_colc + cj]<<"\n";
+						strtmp<<"$nodeb_("<<(base_startIndex + Base_Num - 1 + New_Index)<<") set Z_ "<<base_loc[2][(ri - 1) * Base_colc + cj]<<"\n";
 
 						printf("$node_(");
 						printf("%d",(base_startIndex + Base_Num - 1 + New_Index));
 						printf(") color \"red\"\n");
 
-						strtmp<<"$node_("<<(base_startIndex + Base_Num - 1 + New_Index)<<") color \"red\"\n";
+						strtmp<<"$nodeb_("<<(base_startIndex + Base_Num - 1 + New_Index)<<") color \"red\"\n";
 
 					}
 
@@ -1715,7 +1715,7 @@ ScenGene::file_bastcl(){
 
 void
 ScenGene::file_wirtcl(){
-	int wired_startIndex = vehibases_num;//NO. is start from the id of the vehicular
+	int wired_startIndex = 0;//NO. is start from the id of the vehicular
 
 	std::ostringstream strtmp;
 	strtmp<<"\n";
@@ -1873,8 +1873,8 @@ ScenGene::file_wirtcl(){
 
 void
 ScenGene::file_pattcl(){
-	int wired_startIndex = vehibases_num;//NO. is start from the id of the vehicular
-	int bases_startIndex = route_vehi_num;
+	int wired_startIndex = 0;//NO. is start from the id of the vehicular
+	int bases_startIndex = 0;
 
 	std::ostringstream strtmp;
 	strtmp<<"\n";
@@ -1907,20 +1907,50 @@ ScenGene::file_pattcl(){
 
 
 				if(wired_junc_only == 1){
-					if(ri % Base_colc != 0){
+					if(ri % Base_colc != 0){//not the last element in the same row
 						strtmp<<"$ns_ duplex-link $nodew_("<<(wired_startIndex + ri - 1)<<") $nodew_("<<(wired_startIndex + ri)<<") 5Mb 2ms DropTail\n";
 					}
-					if((ri-1) / Base_colc < Base_rowc -1){
+					if((ri-1) / Base_colc < Base_rowc -1){//the elements in the last row
 						strtmp<<"$ns_ duplex-link $nodew_("<<(wired_startIndex + ri - 1)<<") $nodew_("<<(wired_startIndex + ri - 1 + Base_colc)<<") 5Mb 2ms DropTail\n";
 					}
-					strtmp<<"$ns_ duplex-link $nodew_("<<(wired_startIndex + ri - 1)<<") $node_("<<(bases_startIndex + ri - 1)<<") 5Mb 2ms DropTail\n";
+					strtmp<<"$ns_ duplex-link $nodew_("<<(wired_startIndex + ri - 1)<<") $nodeb_("<<(bases_startIndex + ri - 1)<<") 5Mb 2ms DropTail\n";
 
+				}else if(wired_junc_only == 0){//
+					if(Between_XNum < 1 && Between_YNum > 0){//row link, column add
+						if(ri % Base_colc != 0){//not the last element in the same row
+							strtmp<<"$ns_ duplex-link $nodew_("<<(wired_startIndex + ri - 1)<<") $nodew_("<<(wired_startIndex + ri)<<") 5Mb 2ms DropTail\n";
+						}
+/*						if((ri-1) / Base_colc < Base_rowc -1){//the elements in the last row
+							strtmp<<"$ns_ duplex-link $nodew_("<<(wired_startIndex + ri - 1)<<") $nodew_("<<(wired_startIndex + ri - 1 + Base_colc)<<") 5Mb 2ms DropTail\n";
+						}*/
+						strtmp<<"$ns_ duplex-link $nodew_("<<(wired_startIndex + ri - 1)<<") $nodeb_("<<(bases_startIndex + ri - 1)<<") 5Mb 2ms DropTail\n";
+
+					}else if(Between_XNum > 0 && Between_YNum < 1){//row add, column link
+/*						if(ri % Base_colc != 0){//not the last element in the same row
+							strtmp<<"$ns_ duplex-link $nodew_("<<(wired_startIndex + ri - 1)<<") $nodew_("<<(wired_startIndex + ri)<<") 5Mb 2ms DropTail\n";
+						}*/
+						if((ri-1) / Base_colc < Base_rowc -1){//the elements in the last row
+							strtmp<<"$ns_ duplex-link $nodew_("<<(wired_startIndex + ri - 1)<<") $nodew_("<<(wired_startIndex + ri - 1 + Base_colc)<<") 5Mb 2ms DropTail\n";
+						}
+						strtmp<<"$ns_ duplex-link $nodew_("<<(wired_startIndex + ri - 1)<<") $nodeb_("<<(bases_startIndex + ri - 1)<<") 5Mb 2ms DropTail\n";
+
+					}else if(Between_XNum  < 1 && Between_YNum < 1){//row add, column link
+						if(ri % Base_colc != 0){//not the last element in the same row
+							strtmp<<"$ns_ duplex-link $nodew_("<<(wired_startIndex + ri - 1)<<") $nodew_("<<(wired_startIndex + ri)<<") 5Mb 2ms DropTail\n";
+						}
+						if((ri-1) / Base_colc < Base_rowc -1){//the elements in the last row
+							strtmp<<"$ns_ duplex-link $nodew_("<<(wired_startIndex + ri - 1)<<") $nodew_("<<(wired_startIndex + ri - 1 + Base_colc)<<") 5Mb 2ms DropTail\n";
+						}
+						strtmp<<"$ns_ duplex-link $nodew_("<<(wired_startIndex + ri - 1)<<") $nodeb_("<<(bases_startIndex + ri - 1)<<") 5Mb 2ms DropTail\n";
+
+					}
 				}else{
-
+					cout<<"\n------------------------ERROR value of wired_junc_only "<<endl;
 				}
 
 			}
 
+			strtmp<<"\n========\n";
 
 			int New_Index = 0;
 
@@ -1933,13 +1963,18 @@ ScenGene::file_pattcl(){
 						New_Index++;
 
 						if(bi == 1){
-							strtmp<<"$ns_ duplex-link $nodew_("<<(wired_startIndex + Base_Num - 1 + New_Index)<<") $nodew_("<<(bases_startIndex + (ri-1)*Base_rowc + cj - 1)<<") 5Mb 2ms DropTail\n";
+							strtmp<<"$ns_ duplex-link $nodew_("<<(wired_startIndex + Base_Num - 1 + New_Index)<<") $nodew_("<<(wired_startIndex + (ri-1)*Base_rowc + cj - 1)<<") 5Mb 2ms DropTail\n";
+							if(bi < Between_XNum){//only one more node add,thus bi==1 && bi == Between_XNum
+								strtmp<<"$ns_ duplex-link $nodew_("<<(wired_startIndex + Base_Num - 1 + New_Index)<<") $nodew_("<<(wired_startIndex + Base_Num - 1 + New_Index + 1)<<") 5Mb 2ms DropTail\n";
+							}else{
+								strtmp<<"$ns_ duplex-link $nodew_("<<(wired_startIndex + Base_Num - 1 + New_Index)<<") $nodew_("<<(wired_startIndex + (ri-1)*Base_rowc + cj)<<") 5Mb 2ms DropTail\n";
+							}
 						}else if(bi == Between_XNum){
-							strtmp<<"$ns_ duplex-link $nodew_("<<(wired_startIndex + Base_Num - 1 + New_Index)<<") $nodew_("<<(bases_startIndex + (ri-1)*Base_rowc + cj)<<") 5Mb 2ms DropTail\n";
+							strtmp<<"$ns_ duplex-link $nodew_("<<(wired_startIndex + Base_Num - 1 + New_Index)<<") $nodew_("<<(wired_startIndex + (ri-1)*Base_rowc + cj)<<") 5Mb 2ms DropTail\n";
 						}else{
 							strtmp<<"$ns_ duplex-link $nodew_("<<(wired_startIndex + Base_Num - 1 + New_Index)<<") $nodew_("<<(wired_startIndex + Base_Num - 1 + New_Index + 1)<<") 5Mb 2ms DropTail\n";
 						}
-
+						strtmp<<"$ns_ duplex-link $nodew_("<<(wired_startIndex + Base_Num - 1 + New_Index)<<") $nodeb_("<<(bases_startIndex + Base_Num - 1 + New_Index)<<") 5Mb 2ms DropTail\n";
 					}
 
 					for(int bi = 1; bi < Between_YNum + 1; bi++){//extend with adding junctions to next row
@@ -1947,13 +1982,18 @@ ScenGene::file_pattcl(){
 						New_Index++;
 
 						if(bi == 1){
-							strtmp<<"$ns_ duplex-link $nodew_("<<(wired_startIndex + Base_Num - 1 + New_Index)<<") $nodew_("<<(bases_startIndex + (ri-1)*Base_rowc + cj - 1)<<") 5Mb 2ms DropTail\n";
+							strtmp<<"$ns_ duplex-link $nodew_("<<(wired_startIndex + Base_Num - 1 + New_Index)<<") $nodew_("<<(wired_startIndex + (ri-1)*Base_rowc + cj - 1)<<") 5Mb 2ms DropTail\n";
+							if(bi < Between_YNum){
+								strtmp<<"$ns_ duplex-link $nodew_("<<(wired_startIndex + Base_Num - 1 + New_Index)<<") $nodew_("<<(wired_startIndex + Base_Num - 1 + New_Index + 1)<<") 5Mb 2ms DropTail\n";
+							}else{
+								strtmp<<"$ns_ duplex-link $nodew_("<<(wired_startIndex + Base_Num - 1 + New_Index)<<") $nodew_("<<(wired_startIndex + (ri)*Base_rowc + cj - 1)<<") 5Mb 2ms DropTail\n";
+							}
 						}else if(bi == Between_YNum){
-							strtmp<<"$ns_ duplex-link $nodew_("<<(wired_startIndex + Base_Num - 1 + New_Index)<<") $nodew_("<<(bases_startIndex + (ri)*Base_rowc + cj - 1)<<") 5Mb 2ms DropTail\n";
+							strtmp<<"$ns_ duplex-link $nodew_("<<(wired_startIndex + Base_Num - 1 + New_Index)<<") $nodew_("<<(wired_startIndex + (ri)*Base_rowc + cj - 1)<<") 5Mb 2ms DropTail\n";
 						}else{
 							strtmp<<"$ns_ duplex-link $nodew_("<<(wired_startIndex + Base_Num - 1 + New_Index)<<") $nodew_("<<(wired_startIndex + Base_Num - 1 + New_Index + 1)<<") 5Mb 2ms DropTail\n";
 						}
-
+						strtmp<<"$ns_ duplex-link $nodew_("<<(wired_startIndex + Base_Num - 1 + New_Index)<<") $nodeb_("<<(bases_startIndex + Base_Num - 1 + New_Index)<<") 5Mb 2ms DropTail\n";
 					}
 
 				}
