@@ -58,6 +58,7 @@ private:
 	int			route_edge_range_base;
 	int			route_edge_range_max;
 	string		route_edge_start;
+	int			route_edge_backward_cycle_bits;
 
 
 	int			route_vehi_prefix;
