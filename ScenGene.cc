@@ -15,20 +15,19 @@
 
 using namespace std;
 
-
 class ScenGene;
 
 const static char digits[11] = {'0','1','2','3','4','5','6','7','8','9','\0'};
-const static string key_Input[7] = {"____","**","__node__","__edge__","__route__","__file__"};
+const static string key_Input[8] = {"____","**","__node__","__edge__","__route__","__file__","__wired__"};
 const static string key_node[12] = { "node_prefix","rowc","colc","xmax","ymax","axis_type","radius","xstart","ystart","base_start","junc_type","junc_width"};
 const static string key_edge[4] = {"lanes","bidirection","connectivity","edge_prefix"};
-const static string key_route[22] = {
+const static string key_route[23] = {
 					"vtype_prefix","vtype_num", "vtype_accel", "vtype_decel",   "vtype_length", "vtype_Maxspeed","vtype_width","vtype_sigma",
 					"trip_prefix", "trip_index","trip_num",    "edge_rangeBase","edge_rangeMax","edge_start",
 					"vehi_prefix", "vehi_num",  "vehi_types",  "vehi_routes",   "vehi_depart",  "vehi_color",
-					"poisson_lambda","trip_divide_num"};
-const static string key_file[5] = {"name","node_xml","edge_xml","route_xml","base_xml"};
-
+					"poisson_lambda","trip_divide_num","edge_backCycle"};
+const static string key_file[7] = {"name","node_xml","edge_xml","route_xml","base_tcl","wired_tcl","connect_tcl"};
+const static string key_wired[3] = {"junc_Only","xdist_base","ydist_base"};
 const static string nodeTypeStr[11]={"priority",
 								"traffic_light",
 								"right_before_left",
@@ -50,6 +49,9 @@ int main(void){
 	sg->file_nodxml();
 	sg->file_edgxml();
 	sg->file_rouxml();
+	sg->file_bastcl();
+	sg->file_wirtcl();
+	sg->file_pattcl();
 }
 
 
@@ -70,6 +72,7 @@ ScenGene::ScenGene(){
 	node_axis_type_bits = 0;
 	node_junc_type = 0;
 	node_base_station_start = 0;
+	node_junc_width = 0;
 //edge----------------------streets & lanes &  links
 	edge_prefix = "";
 	edge_lane_num = 0;
@@ -87,6 +90,7 @@ ScenGene::ScenGene(){
 	route_trip_prefix = "";
 	route_trip_start = 0;
 	route_trip_num = 0;
+	route_trip_divide_num = 0;
 
 	route_edge_range_base = 0;
 	route_edge_range_max = 0;
@@ -119,6 +123,14 @@ ScenGene::ScenGene(){
 		base_loc[i] = new double[1];
 	}
 
+	base_startIndex = 0;
+
+	wired_junc_only = -1;
+
+	vehibases_num = 0;
+
+	wired_xdist_base = 0;
+	wired_ydist_base = 0;
 
 }
 
@@ -126,10 +138,6 @@ ScenGene::~ScenGene(){
 	delete base_loc;
 }
 
-void
-ScenGene::readNODEpara(int index){
-
-}
 
 void
 ScenGene::parseLine(int type, int index){
@@ -220,6 +228,9 @@ ScenGene::parseValue(int type, int index){
 		break;
 	case 5:
 		filePara(index);
+		break;
+	case 6:
+		wiredPara(index);
 		break;
 	}
 }
@@ -350,6 +361,8 @@ ScenGene::routePara(int index){
 		lambda = atoi(para_value_one.c_str());break;
 	case 21:
 		route_trip_divide_num = atoi(para_value_one.c_str());break;
+	case 22:
+		route_edge_backward_cycle_bits = atoi(para_value_one.c_str());break;
 	default:
 		cout<<" ERROR exists in routePara..."<<endl;
 	}
@@ -387,6 +400,16 @@ ScenGene::filePara(int index){
 		strtmp<<fileName<<"."<<para_value_one;
 		baseFile = strtmp.str();
 		break;
+	case 5:
+
+		strtmp<<fileName<<"."<<para_value_one;
+		wiredFile = strtmp.str();
+		break;
+	case 6:
+
+		strtmp<<fileName<<"."<<para_value_one;
+		patternFile = strtmp.str();
+		break;
 	default:
 		cout<<" ERROR exists in filePara..."<<endl;
 	}
@@ -394,6 +417,27 @@ ScenGene::filePara(int index){
 	cout<<endl;
 	//soft codes
 	cout<<"k= "<<key_file[index]<<" v="<<para_value_one<<endl;
+}
+
+void
+ScenGene::wiredPara(int index){
+	//hard codes
+	std::ostringstream strtmp;
+
+	switch(index){
+	case 0:
+		wired_junc_only = atoi(para_value_one.c_str());break;
+	case 1:
+		wired_xdist_base = atof(para_value_one.c_str());break;
+	case 2:
+		wired_ydist_base = atof(para_value_one.c_str());break;
+	default:
+		cout<<" ERROR exists in wiredPara..."<<endl;
+	}
+
+	cout<<endl;
+	//soft codes
+	cout<<"k= "<<key_wired[index]<<" v="<<para_value_one<<endl;
 }
 void
 ScenGene::printPara(){
@@ -452,7 +496,7 @@ ScenGene::printPara(){
 	}
 	cout<<endl;
 	cout<<"route parameters lists:"<<endl;
-	for(int i = 0; i < 22; i++){
+	for(int i = 0; i < 23; i++){
 		cout<<"**\t"<<key_route[i]<<" ";
 		switch(i){
 		case 0:
@@ -522,6 +566,8 @@ ScenGene::printPara(){
 			cout<<lambda;break;
 		case 21:
 			cout<<route_trip_divide_num;break;
+		case 22:
+			cout<<route_edge_backward_cycle_bits;break;
 		default:
 			cout<<" ERROR exists in route printPara..."<<endl;
 
@@ -531,7 +577,7 @@ ScenGene::printPara(){
 
 	cout<<endl;
 	cout<<"file parameters lists:"<<endl;
-	for(int i = 0; i < 5; i++){
+	for(int i = 0; i < 7; i++){
 		cout<<"**\t"<<key_file[i]<<" ";
 		switch(i){
 		case 0:
@@ -544,8 +590,29 @@ ScenGene::printPara(){
 			cout<<routeFile;break;
 		case 4:
 			cout<<baseFile;break;
+		case 5:
+			cout<<wiredFile;break;
+		case 6:
+			cout<<patternFile;break;
 		default:
 			cout<<" ERROR exists in file printPara..."<<endl;
+		}
+		cout<<endl;
+	}
+
+	cout<<endl;
+	cout<<"wired parameters lists:"<<endl;
+	for(int i = 0; i < 3; i++){
+		cout<<"**\t"<<key_wired[i]<<" ";
+		switch(i){
+		case 0:
+			cout<<wired_junc_only;break;
+		case 1:
+			cout<<wired_xdist_base;break;
+		case 2:
+			cout<<wired_ydist_base;break;
+		default:
+			cout<<" ERROR exists in wired printPara..."<<endl;
 		}
 		cout<<endl;
 	}
@@ -613,6 +680,12 @@ ScenGene::readconf(){
 				break;
 			case 5://  file parameters..................
 				cout<<" "<<key_file[element_index]<<endl;
+				current_line = cont;
+				parseLine(Enter_index,element_index);
+				parseValue(Enter_index,element_index);
+				break;
+			case 6://  wired parameters..................
+				cout<<" "<<key_wired[element_index]<<endl;
 				current_line = cont;
 				parseLine(Enter_index,element_index);
 				parseValue(Enter_index,element_index);
@@ -1292,7 +1365,13 @@ ScenGene::file_rouxml(){
 
 				int collision = 0;
 //				printf("\n");
-				for(int tmp_ei = 1; tmp_ei < ei + 1; tmp_ei++){
+				int tmp_ei = 1;
+				if(route_edge_backward_cycle_bits == 6)
+					tmp_ei = ei-1;
+				if(route_edge_backward_cycle_bits == 5)
+					tmp_ei = 1;
+
+				for(; tmp_ei < ei + 1; tmp_ei++){
 					char rowChar[6]={'1'};
 					char colChar[6]={'1'};
 					if (Current_trip[tmp_ei*2-1] == rowno_next){
@@ -1475,6 +1554,512 @@ ScenGene::file_rouxml(){
 	strtmp<<"\n</routes>";
 	string contf = strtmp.str();
 	routeXML(contf);
+}
+
+void
+ScenGene::file_bastcl(){
+
+	base_startIndex = 0;//NO. is start from the id of the vehicular
+
+	std::ostringstream strtmp;
+	strtmp<<"\n";
+
+	vehibases_num = route_vehi_num;
+
+
+//	if(base_xstep < node_radius * 2 + 10.0 || base_ystep < node_radius * 2 + 10.0) return;
+
+
+			int Base_rowc = node_rowc;
+			int Base_colc = node_colc;
+			int Base_Num = Base_rowc*Base_colc;
+
+			vehibases_num += Base_Num;
+
+			int Between_XNum = floor((base_xstep - node_radius * 2) / node_radius / 2);
+
+			int Between_YNum = floor((base_ystep - node_radius * 2) / node_radius / 2);
+
+			double base_cxstep = 0.0;
+			double base_cystep = 0.0;
+
+			if(Between_XNum > 0)base_cxstep = (base_xstep) / (Between_XNum + 1); //since we want the edges, which is more than the no. of junctions
+			if(Between_YNum > 0)base_cystep = (base_ystep) / (Between_YNum + 1);
+
+	//		int row_Num = Between_XNum * (COL_COUNT - 1); //since we want the edges, which is less than the no. of junctions
+	//		int col_Num = Between_YNum * (ROW_COUNT - 1);
+
+			printf("the xno.=%d, yno.=%d, and interval=%0.2f, orignInterval=%0.2f\n\n",Between_XNum,Between_YNum,base_cxstep,base_xstep);
+
+
+
+			for(int ri = 1; ri < Base_Num + 1; ri++){
+				printf("\nset node_(");
+				printf("%d",(base_startIndex + ri - 1));
+				printf(") [$ns_ node]\n");
+
+//				strtmp<<"\nset node_("<<(base_startIndex + ri - 1)<<") [$ns_ node]\n";
+
+				printf("$node_(");
+				printf("%d",(base_startIndex + ri - 1));
+				printf(") set X_ %0.4f\n",base_loc[0][ri]);
+
+				strtmp<<"$nodeb_("<<(base_startIndex + ri - 1)<<") set X_ "<<base_loc[0][ri]<<"\n";
+
+				printf("$node_(");
+				printf("%d",(base_startIndex + ri - 1));
+				printf(") set Y_ %0.4f\n",base_loc[1][ri]);
+
+				strtmp<<"$nodeb_("<<(base_startIndex + ri - 1)<<") set Y_ "<<base_loc[1][ri]<<"\n";
+
+				printf("$node_(");
+				printf("%d",(base_startIndex + ri - 1));
+				printf(") set Z_ %0.4f\n",base_loc[2][ri]);
+
+				strtmp<<"$nodeb_("<<(base_startIndex + ri - 1)<<") set Z_ "<<base_loc[2][ri]<<"\n";
+
+				printf("$node_(");
+				printf("%d",(base_startIndex + ri - 1));
+				printf(") color \"blue\"\n");
+
+				strtmp<<"$nodeb_("<<(base_startIndex + ri - 1)<<") color \"green\"\n";
+			}
+
+
+			int New_Index = 0;
+
+			for (int ri = 1; ri < Base_rowc + 1; ri++) { //last row NOT add junction to next row
+
+				for (int cj = 1; cj < Base_colc + 1; cj++) { //last column NOT add junction to next column
+
+					for(int bi = 1; cj<Base_colc && bi < Between_XNum + 1; bi++){//extend with adding junctions to next column
+
+						New_Index++;
+
+						printf("\nset node_(");
+						printf("%d",(base_startIndex + Base_Num - 1 + New_Index));
+						printf(") [$ns_ node]\n");
+
+//						strtmp<<"\nset node_("<<(base_startIndex + Base_Num - 1 + New_Index)<<") [$ns_ node]\n";
+
+						printf("$node_(");
+						printf("%d",(base_startIndex + Base_Num - 1 + New_Index));
+						printf(") set X_ %0.4f\n",base_loc[0][(ri - 1) * Base_colc + cj] + bi * base_cxstep);
+
+						strtmp<<"$nodeb_("<<(base_startIndex + Base_Num - 1 + New_Index)<<") set X_ "<<base_loc[0][(ri - 1) * Base_colc + cj] + bi * base_cxstep<<"\n";
+
+						printf("$node_(");
+						printf("%d",(base_startIndex + Base_Num - 1 + New_Index));
+						printf(") set Y_ %0.4f\n",base_loc[1][(ri - 1) * Base_colc + cj]);
+
+						strtmp<<"$nodeb_("<<(base_startIndex + Base_Num - 1 + New_Index)<<") set Y_ "<<base_loc[1][(ri - 1) * Base_colc + cj]<<"\n";
+
+						printf("$node_(");
+						printf("%d",(base_startIndex + Base_Num - 1 + New_Index));
+						printf(") set Z_ %0.4f\n",base_loc[2][(ri - 1) * Base_colc + cj]);
+
+						strtmp<<"$nodeb_("<<(base_startIndex + Base_Num - 1 + New_Index)<<") set Z_ "<<base_loc[2][(ri - 1) * Base_colc + cj]<<"\n";
+
+						printf("$node_(");
+						printf("%d",(base_startIndex + Base_Num - 1 + New_Index));
+						printf(") color \"red\"\n");
+
+						strtmp<<"$nodeb_("<<(base_startIndex + Base_Num - 1 + New_Index)<<") color \"green\"\n";
+
+					}
+
+					for(int bi = 1; ri<Base_rowc && bi < Between_YNum + 1; bi++){//extend with adding junctions to next row
+
+						New_Index++;
+
+						printf("\nset node_(");
+						printf("%d",(base_startIndex + Base_Num - 1 + New_Index));
+						printf(") [$ns node]\n");
+
+//						strtmp<<"\nset node_("<<(base_startIndex + Base_Num - 1 + New_Index)<<") [$ns_ node]\n";
+
+						printf("$node_(");
+						printf("%d",(base_startIndex + Base_Num - 1 + New_Index));
+						printf(") set X_ %0.4f\n",base_loc[0][(ri - 1) * Base_colc + cj]);
+
+						strtmp<<"$nodeb_("<<(base_startIndex + Base_Num - 1 + New_Index)<<") set X_ "<<base_loc[0][(ri - 1) * Base_colc + cj]<<"\n";
+
+						printf("$node_(");
+						printf("%d",(base_startIndex + Base_Num - 1 + New_Index));
+						printf(") set Y_ %0.4f\n",base_loc[1][(ri - 1) * Base_colc + cj] + bi * base_cystep);
+
+						strtmp<<"$nodeb_("<<(base_startIndex + Base_Num - 1 + New_Index)<<") set Y_ "<<base_loc[1][(ri - 1) * Base_colc + cj] + bi * base_cystep<<"\n";
+
+						printf("$node_(");
+						printf("%d",(base_startIndex + Base_Num - 1 + New_Index));
+						printf(") set Z_ %0.4f\n",base_loc[2][(ri - 1) * Base_colc + cj]);
+
+						strtmp<<"$nodeb_("<<(base_startIndex + Base_Num - 1 + New_Index)<<") set Z_ "<<base_loc[2][(ri - 1) * Base_colc + cj]<<"\n";
+
+						printf("$node_(");
+						printf("%d",(base_startIndex + Base_Num - 1 + New_Index));
+						printf(") color \"red\"\n");
+
+						strtmp<<"$nodeb_("<<(base_startIndex + Base_Num - 1 + New_Index)<<") color \"green\"\n";
+
+					}
+
+				}
+
+	/*			//right-orient node
+				printf("\nset node_(2");
+				TwoIntToChars(((ri - 1) / COL_COUNT + 1));
+				TwoIntToChars(((ri - 1) % COL_COUNT + 1));*/
+
+			}
+
+			string contf = strtmp.str();
+			baseStationTCL(contf);
+
+			vehibases_num += New_Index;
+			printf("\n\nthe amout of base stations is %d", New_Index);
+
+
+}
+
+void
+ScenGene::file_wirtcl(){
+	int wired_startIndex = 0;//NO. is start from the id of the vehicular
+
+	std::ostringstream strtmp;
+	strtmp<<"\n";
+
+//	if(base_xstep < node_radius * 2 + 10.0 || base_ystep < node_radius * 2 + 10.0) return;
+
+
+			int Base_rowc = node_rowc;
+			int Base_colc = node_colc;
+			int Base_Num = Base_rowc*Base_colc;
+
+			int Between_XNum = floor((base_xstep - node_radius * 2) / node_radius / 2);
+
+			int Between_YNum = floor((base_ystep - node_radius * 2) / node_radius / 2);
+
+			double base_cxstep = 0.0;
+			double base_cystep = 0.0;
+
+			if(Between_XNum > 0)base_cxstep = (base_xstep) / (Between_XNum + 1); //since we want the edges, which is more than the no. of junctions
+			if(Between_YNum > 0)base_cystep = (base_ystep) / (Between_YNum + 1);
+
+	//		int row_Num = Between_XNum * (COL_COUNT - 1); //since we want the edges, which is less than the no. of junctions
+	//		int col_Num = Between_YNum * (ROW_COUNT - 1);
+
+			printf("the xno.=%d, yno.=%d, and interval=%0.2f, orignInterval=%0.2f\n\n",Between_XNum,Between_YNum,base_cxstep,base_xstep);
+
+
+
+			for(int ri = 1; ri < Base_Num + 1; ri++){
+				printf("\nset node_(");
+				printf("%d",(wired_startIndex + ri - 1));
+				printf(") [$ns_ node]\n");
+
+//				strtmp<<"\nset node_("<<(base_startIndex + ri - 1)<<") [$ns_ node]\n";
+
+				printf("$node_(");
+				printf("%d",(wired_startIndex + ri - 1));
+				printf(") set X_ %0.4f\n",base_loc[0][ri]);
+
+				strtmp<<"$nodew_("<<(wired_startIndex + ri - 1)<<") set X_ "<<base_loc[0][ri] + wired_xdist_base<<"\n";
+
+				printf("$node_(");
+				printf("%d",(wired_startIndex + ri - 1));
+				printf(") set Y_ %0.4f\n",base_loc[1][ri]);
+
+				strtmp<<"$nodew_("<<(wired_startIndex + ri - 1)<<") set Y_ "<<base_loc[1][ri] + wired_ydist_base<<"\n";
+
+				printf("$node_(");
+				printf("%d",(wired_startIndex + ri - 1));
+				printf(") set Z_ %0.4f\n",base_loc[2][ri]);
+
+				strtmp<<"$nodew_("<<(wired_startIndex + ri - 1)<<") set Z_ "<<base_loc[2][ri]<<"\n";
+
+				printf("$node_(");
+				printf("%d",(wired_startIndex + ri - 1));
+				printf(") color \"blue\"\n");
+
+				strtmp<<"$nodew_("<<(wired_startIndex + ri - 1)<<") color \"red\"\n";
+			}
+
+
+			int New_Index = 0;
+
+			for (int ri = 1; wired_junc_only < 1 && ri < Base_rowc + 1; ri++) { //last row NOT add junction to next row
+
+				for (int cj = 1; cj < Base_colc + 1; cj++) { //last column NOT add junction to next column
+
+					for(int bi = 1; cj<Base_colc && bi < Between_XNum + 1; bi++){//extend with adding junctions to next column
+
+						New_Index++;
+
+						printf("\nset node_(");
+						printf("%d",(wired_startIndex + Base_Num - 1 + New_Index));
+						printf(") [$ns_ node]\n");
+
+//						strtmp<<"\nset node_("<<(base_startIndex + Base_Num - 1 + New_Index)<<") [$ns_ node]\n";
+
+						printf("$node_(");
+						printf("%d",(wired_startIndex + Base_Num - 1 + New_Index));
+						printf(") set X_ %0.4f\n",base_loc[0][(ri - 1) * Base_colc + cj] + bi * base_cxstep);
+
+						strtmp<<"$nodew_("<<(wired_startIndex + Base_Num - 1 + New_Index)<<") set X_ "<<base_loc[0][(ri - 1) * Base_colc + cj] + bi * base_cxstep + wired_xdist_base<<"\n";
+
+						printf("$node_(");
+						printf("%d",(wired_startIndex + Base_Num - 1 + New_Index));
+						printf(") set Y_ %0.4f\n",base_loc[1][(ri - 1) * Base_colc + cj]);
+
+						strtmp<<"$nodew_("<<(wired_startIndex + Base_Num - 1 + New_Index)<<") set Y_ "<<base_loc[1][(ri - 1) * Base_colc + cj] + wired_ydist_base<<"\n";
+
+						printf("$node_(");
+						printf("%d",(wired_startIndex + Base_Num - 1 + New_Index));
+						printf(") set Z_ %0.4f\n",base_loc[2][(ri - 1) * Base_colc + cj]);
+
+						strtmp<<"$nodew_("<<(wired_startIndex + Base_Num - 1 + New_Index)<<") set Z_ "<<base_loc[2][(ri - 1) * Base_colc + cj]<<"\n";
+
+						printf("$node_(");
+						printf("%d",(wired_startIndex + Base_Num - 1 + New_Index));
+						printf(") color \"red\"\n");
+
+						strtmp<<"$nodew_("<<(wired_startIndex + Base_Num - 1 + New_Index)<<") color \"red\"\n";
+
+					}
+
+					for(int bi = 1; ri< Base_rowc && bi < Between_YNum + 1; bi++){//extend with adding junctions to next row
+
+						New_Index++;
+
+						printf("\nset node_(");
+						printf("%d",(wired_startIndex + Base_Num - 1 + New_Index));
+						printf(") [$ns node]\n");
+
+//						strtmp<<"\nset node_("<<(base_startIndex + Base_Num - 1 + New_Index)<<") [$ns_ node]\n";
+
+						printf("$node_(");
+						printf("%d",(wired_startIndex + Base_Num - 1 + New_Index));
+						printf(") set X_ %0.4f\n",base_loc[0][(ri - 1) * Base_colc + cj]);
+
+						strtmp<<"$nodew_("<<(wired_startIndex + Base_Num - 1 + New_Index)<<") set X_ "<<base_loc[0][(ri - 1) * Base_colc + cj] + wired_xdist_base<<"\n";
+
+						printf("$node_(");
+						printf("%d",(wired_startIndex + Base_Num - 1 + New_Index));
+						printf(") set Y_ %0.4f\n",base_loc[1][(ri - 1) * Base_colc + cj] + bi * base_cystep);
+
+						strtmp<<"$nodew_("<<(wired_startIndex + Base_Num - 1 + New_Index)<<") set Y_ "<<base_loc[1][(ri - 1) * Base_colc + cj] + bi * base_cystep + wired_ydist_base<<"\n";
+
+						printf("$node_(");
+						printf("%d",(wired_startIndex + Base_Num - 1 + New_Index));
+						printf(") set Z_ %0.4f\n",base_loc[2][(ri - 1) * Base_colc + cj]);
+
+						strtmp<<"$nodew_("<<(wired_startIndex + Base_Num - 1 + New_Index)<<") set Z_ "<<base_loc[2][(ri - 1) * Base_colc + cj]<<"\n";
+
+						printf("$node_(");
+						printf("%d",(wired_startIndex + Base_Num - 1 + New_Index));
+						printf(") color \"red\"\n");
+
+						strtmp<<"$nodew_("<<(wired_startIndex + Base_Num - 1 + New_Index)<<") color \"red\"\n";
+
+					}
+
+				}
+
+	/*			//right-orient node
+				printf("\nset node_(2");
+				TwoIntToChars(((ri - 1) / COL_COUNT + 1));
+				TwoIntToChars(((ri - 1) % COL_COUNT + 1));*/
+
+			}
+
+			string contf = strtmp.str();
+			wiredNodeTCL(contf);
+//			printf("\n\nthe amout of wired is %d", New_Index);
+
+
+}
+
+void
+ScenGene::file_pattcl(){
+	int wired_startIndex = 0;//NO. is start from the id of the vehicular
+	int bases_startIndex = 0;
+
+	std::ostringstream strtmp;
+	strtmp<<"\n";
+
+//	if(base_xstep < node_radius * 2 + 10.0 || base_ystep < node_radius * 2 + 10.0) return;
+
+
+			int Base_rowc = node_rowc;
+			int Base_colc = node_colc;
+			int Base_Num = Base_rowc*Base_colc;
+
+			int Between_XNum = floor((base_xstep - node_radius * 2) / node_radius / 2);
+
+			int Between_YNum = floor((base_ystep - node_radius * 2) / node_radius / 2);
+
+			double base_cxstep = 0.0;
+			double base_cystep = 0.0;
+
+			if(Between_XNum > 0)base_cxstep = (base_xstep) / (Between_XNum + 1); //since we want the edges, which is more than the no. of junctions
+			if(Between_YNum > 0)base_cystep = (base_ystep) / (Between_YNum + 1);
+
+	//		int row_Num = Between_XNum * (COL_COUNT - 1); //since we want the edges, which is less than the no. of junctions
+	//		int col_Num = Between_YNum * (ROW_COUNT - 1);
+
+			printf("the xno.=%d, yno.=%d, and interval=%0.2f, orignInterval=%0.2f\n\n",Between_XNum,Between_YNum,base_cxstep,base_xstep);
+
+
+
+			for(int ri = 1; ri < Base_Num + 1; ri++){
+
+
+				if(wired_junc_only == 1){// base station only at junction
+					if(ri % Base_colc != 0){//not the last element in the same row
+						strtmp<<"$ns_ duplex-link $nodew_("<<(wired_startIndex + ri - 1)<<") $nodew_("<<(wired_startIndex + ri)<<") 5Mb 2ms DropTail\n";
+
+						strtmp<<"$ns_ duplex-link-op $nodew_("<<(wired_startIndex + ri - 1)<<") $nodew_("<<(wired_startIndex + ri)<<") orient right\n";
+					}
+					if((ri-1) / Base_colc < Base_rowc -1){//the elements in the last row
+						strtmp<<"$ns_ duplex-link $nodew_("<<(wired_startIndex + ri - 1)<<") $nodew_("<<(wired_startIndex + ri - 1 + Base_colc)<<") 5Mb 2ms DropTail\n";
+
+						strtmp<<"$ns_ duplex-link-op $nodew_("<<(wired_startIndex + ri - 1)<<") $nodew_("<<(wired_startIndex + ri - 1 + Base_colc)<<") orient up\n";
+					}
+					strtmp<<"$ns_ duplex-link $nodew_("<<(wired_startIndex + ri - 1)<<") $nodeb_("<<(bases_startIndex + ri - 1)<<") 5Mb 2ms DropTail\n";
+
+					strtmp<<"$ns_ duplex-link $nodew_("<<(wired_startIndex + ri - 1)<<") $nodeb_("<<(bases_startIndex + ri - 1)<<") orient left-down\n";
+				}else if(wired_junc_only == 0){//
+					if(Between_XNum < 1 && Between_YNum > 0){//row link, column add
+						if(ri % Base_colc != 0){//not the last element in the same row
+							strtmp<<"$ns_ duplex-link $nodew_("<<(wired_startIndex + ri - 1)<<") $nodew_("<<(wired_startIndex + ri)<<") 5Mb 2ms DropTail\n";
+
+							strtmp<<"$ns_ duplex-link-op $nodew_("<<(wired_startIndex + ri - 1)<<") $nodew_("<<(wired_startIndex + ri)<<") orient right\n";
+						}
+/*						if((ri-1) / Base_colc < Base_rowc -1){//the elements in the last row
+							strtmp<<"$ns_ duplex-link $nodew_("<<(wired_startIndex + ri - 1)<<") $nodew_("<<(wired_startIndex + ri - 1 + Base_colc)<<") 5Mb 2ms DropTail\n";
+						}*/
+						strtmp<<"$ns_ duplex-link $nodew_("<<(wired_startIndex + ri - 1)<<") $nodeb_("<<(bases_startIndex + ri - 1)<<") 5Mb 2ms DropTail\n";
+
+						strtmp<<"$ns_ duplex-link-op $nodew_("<<(wired_startIndex + ri - 1)<<") $nodeb_("<<(bases_startIndex + ri - 1)<<") orient left-down\n";
+
+					}else if(Between_XNum > 0 && Between_YNum < 1){//row add, column link
+/*						if(ri % Base_colc != 0){//not the last element in the same row
+							strtmp<<"$ns_ duplex-link $nodew_("<<(wired_startIndex + ri - 1)<<") $nodew_("<<(wired_startIndex + ri)<<") 5Mb 2ms DropTail\n";
+						}*/
+						if((ri-1) / Base_colc < Base_rowc -1){//the elements in the last row
+							strtmp<<"$ns_ duplex-link $nodew_("<<(wired_startIndex + ri - 1)<<") $nodew_("<<(wired_startIndex + ri - 1 + Base_colc)<<") 5Mb 2ms DropTail\n";
+
+							strtmp<<"$ns_ duplex-link-op $nodew_("<<(wired_startIndex + ri - 1)<<") $nodew_("<<(wired_startIndex + ri - 1 + Base_colc)<<") orient up\n";
+						}
+						strtmp<<"$ns_ duplex-link $nodew_("<<(wired_startIndex + ri - 1)<<") $nodeb_("<<(bases_startIndex + ri - 1)<<") 5Mb 2ms DropTail\n";
+
+						strtmp<<"$ns_ duplex-link-op $nodew_("<<(wired_startIndex + ri - 1)<<") $nodeb_("<<(bases_startIndex + ri - 1)<<") orient left-down\n";
+					}else if(Between_XNum  < 1 && Between_YNum < 1){//row add, column link
+						if(ri % Base_colc != 0){//not the last element in the same row
+							strtmp<<"$ns_ duplex-link $nodew_("<<(wired_startIndex + ri - 1)<<") $nodew_("<<(wired_startIndex + ri)<<") 5Mb 2ms DropTail\n";
+
+							strtmp<<"$ns_ duplex-link-op $nodew_("<<(wired_startIndex + ri - 1)<<") $nodew_("<<(wired_startIndex + ri)<<") orient right\n";
+						}
+						if((ri-1) / Base_colc < Base_rowc -1){//the elements in the last row
+							strtmp<<"$ns_ duplex-link $nodew_("<<(wired_startIndex + ri - 1)<<") $nodew_("<<(wired_startIndex + ri - 1 + Base_colc)<<") 5Mb 2ms DropTail\n";
+
+							strtmp<<"$ns_ duplex-link-op $nodew_("<<(wired_startIndex + ri - 1)<<") $nodew_("<<(wired_startIndex + ri - 1 + Base_colc)<<") orient up\n";
+						}
+						strtmp<<"$ns_ duplex-link $nodew_("<<(wired_startIndex + ri - 1)<<") $nodeb_("<<(bases_startIndex + ri - 1)<<") 5Mb 2ms DropTail\n";
+
+						strtmp<<"$ns_ duplex-link-op $nodew_("<<(wired_startIndex + ri - 1)<<") $nodeb_("<<(bases_startIndex + ri - 1)<<") orient left-down\n";
+
+					}
+				}else{
+					cout<<"\n------------------------ERROR value of wired_junc_only "<<endl;
+				}
+
+			}
+
+
+			int New_Index = 0;
+
+			for (int ri = 1; wired_junc_only < 1 && ri < Base_rowc + 1; ri++) { //last row NOT add junction to next row
+
+				for (int cj = 1; cj < Base_colc + 1; cj++) { //last column NOT add junction to next column
+
+					for(int bi = 1; cj<Base_colc && (bi < Between_XNum + 1); bi++){//extend with adding junctions to next column
+
+						New_Index++;
+
+						if(bi == 1){
+							strtmp<<"$ns_ duplex-link $nodew_("<<(wired_startIndex + Base_Num - 1 + New_Index)<<") $nodew_("<<(wired_startIndex + (ri-1)*Base_colc + cj - 1)<<") 5Mb 2ms DropTail\n";
+
+							strtmp<<"$ns_ duplex-link-op $nodew_("<<(wired_startIndex + Base_Num - 1 + New_Index)<<") $nodew_("<<(wired_startIndex + (ri-1)*Base_colc + cj - 1)<<") orient left\n";
+							if(bi < Between_XNum){//only one more node add,thus bi==1 && bi == Between_XNum
+								strtmp<<"$ns_ duplex-link $nodew_("<<(wired_startIndex + Base_Num - 1 + New_Index)<<") $nodew_("<<(wired_startIndex + Base_Num - 1 + New_Index + 1)<<") 5Mb 2ms DropTail\n";
+
+								strtmp<<"$ns_ duplex-link-op $nodew_("<<(wired_startIndex + Base_Num - 1 + New_Index)<<") $nodew_("<<(wired_startIndex + Base_Num - 1 + New_Index + 1)<<") orient right\n";
+							}else{
+								strtmp<<"$ns_ duplex-link $nodew_("<<(wired_startIndex + Base_Num - 1 + New_Index)<<") $nodew_("<<(wired_startIndex + (ri-1)*Base_colc + cj)<<") 5Mb 2ms DropTail\n";
+
+								strtmp<<"$ns_ duplex-link-op $nodew_("<<(wired_startIndex + Base_Num - 1 + New_Index)<<") $nodew_("<<(wired_startIndex + (ri-1)*Base_colc + cj)<<") orient right\n";
+							}
+						}else if(bi == Between_XNum){
+							strtmp<<"$ns_ duplex-link $nodew_("<<(wired_startIndex + Base_Num - 1 + New_Index)<<") $nodew_("<<(wired_startIndex + (ri-1)*Base_colc + cj)<<") 5Mb 2ms DropTail\n";
+
+							strtmp<<"$ns_ duplex-link-op $nodew_("<<(wired_startIndex + Base_Num - 1 + New_Index)<<") $nodew_("<<(wired_startIndex + (ri-1)*Base_colc + cj)<<") orient right\n";
+						}else{
+							strtmp<<"$ns_ duplex-link $nodew_("<<(wired_startIndex + Base_Num - 1 + New_Index)<<") $nodew_("<<(wired_startIndex + Base_Num - 1 + New_Index + 1)<<") 5Mb 2ms DropTail\n";
+
+							strtmp<<"$ns_ duplex-link-op $nodew_("<<(wired_startIndex + Base_Num - 1 + New_Index)<<") $nodew_("<<(wired_startIndex + Base_Num - 1 + New_Index + 1)<<") orient right\n";
+						}
+						strtmp<<"$ns_ duplex-link $nodew_("<<(wired_startIndex + Base_Num - 1 + New_Index)<<") $nodeb_("<<(bases_startIndex + Base_Num - 1 + New_Index)<<") 5Mb 2ms DropTail\n";
+
+						strtmp<<"$ns_ duplex-link-op $nodew_("<<(wired_startIndex + Base_Num - 1 + New_Index)<<") $nodeb_("<<(bases_startIndex + Base_Num - 1 + New_Index)<<") orient left-down\n";
+					}
+
+					for(int bi = 1; ri<Base_rowc && (bi < Between_YNum + 1); bi++){//extend with adding junctions to next row
+
+						New_Index++;
+
+						if(bi == 1){
+							strtmp<<"$ns_ duplex-link $nodew_("<<(wired_startIndex + Base_Num - 1 + New_Index)<<") $nodew_("<<(wired_startIndex + (ri-1)*Base_colc + cj - 1)<<") 5Mb 2ms DropTail\n";
+
+							strtmp<<"$ns_ duplex-link-op $nodew_("<<(wired_startIndex + Base_Num - 1 + New_Index)<<") $nodew_("<<(wired_startIndex + (ri-1)*Base_colc + cj - 1)<<") orient down\n";
+							if(bi < Between_YNum){
+								strtmp<<"$ns_ duplex-link $nodew_("<<(wired_startIndex + Base_Num - 1 + New_Index)<<") $nodew_("<<(wired_startIndex + Base_Num - 1 + New_Index + 1)<<") 5Mb 2ms DropTail\n";
+
+								strtmp<<"$ns_ duplex-link-op $nodew_("<<(wired_startIndex + Base_Num - 1 + New_Index)<<") $nodew_("<<(wired_startIndex + Base_Num - 1 + New_Index + 1)<<") orient up\n";
+							}else{
+								strtmp<<"$ns_ duplex-link $nodew_("<<(wired_startIndex + Base_Num - 1 + New_Index)<<") $nodew_("<<(wired_startIndex + (ri)*Base_colc + cj - 1)<<") 5Mb 2ms DropTail\n";
+
+								strtmp<<"$ns_ duplex-link-op $nodew_("<<(wired_startIndex + Base_Num - 1 + New_Index)<<") $nodew_("<<(wired_startIndex + (ri)*Base_colc + cj - 1)<<") orient up\n";
+							}
+						}else if(bi == Between_YNum){
+							strtmp<<"$ns_ duplex-link $nodew_("<<(wired_startIndex + Base_Num - 1 + New_Index)<<") $nodew_("<<(wired_startIndex + (ri)*Base_colc + cj - 1)<<") 5Mb 2ms DropTail\n";
+
+							strtmp<<"$ns_ duplex-link-op $nodew_("<<(wired_startIndex + Base_Num - 1 + New_Index)<<") $nodew_("<<(wired_startIndex + (ri)*Base_colc + cj - 1)<<") orient up\n";
+						}else{
+							strtmp<<"$ns_ duplex-link $nodew_("<<(wired_startIndex + Base_Num - 1 + New_Index)<<") $nodew_("<<(wired_startIndex + Base_Num - 1 + New_Index + 1)<<") 5Mb 2ms DropTail\n";
+
+							strtmp<<"$ns_ duplex-link-op $nodew_("<<(wired_startIndex + Base_Num - 1 + New_Index)<<") $nodew_("<<(wired_startIndex + Base_Num - 1 + New_Index + 1)<<") orient up\n";
+						}
+						strtmp<<"$ns_ duplex-link $nodew_("<<(wired_startIndex + Base_Num - 1 + New_Index)<<") $nodeb_("<<(bases_startIndex + Base_Num - 1 + New_Index)<<") 5Mb 2ms DropTail\n";
+
+						strtmp<<"$ns_ duplex-link $nodew_("<<(wired_startIndex + Base_Num - 1 + New_Index)<<") $nodeb_("<<(bases_startIndex + Base_Num - 1 + New_Index)<<") orient left-down\n";
+					}
+
+				}
+
+	/*			//right-orient node
+				printf("\nset node_(2");
+				TwoIntToChars(((ri - 1) / COL_COUNT + 1));
+				TwoIntToChars(((ri - 1) % COL_COUNT + 1));*/
+
+			}
+
+			string contf = strtmp.str();
+			patternTCL(contf);
+//			printf("\n\nthe amout of wired is %d", New_Index);
+
+
 }
 
 void
@@ -1842,6 +2427,22 @@ void
 ScenGene::routeXML(string cont){
 	writeXML(routeFile,'0',cont);
 }
+
+void
+ScenGene::baseStationTCL(string cont){
+	writeXML(baseFile,'0',cont);
+}
+
+void
+ScenGene::wiredNodeTCL(string cont){
+	writeXML(wiredFile,'0',cont);
+}
+
+void
+ScenGene::patternTCL(string cont){
+	writeXML(patternFile,'0',cont);
+}
+
 /*
 bool
 ScenGene::writeXML(string fname, char openmode, ofstream* paraFile){
