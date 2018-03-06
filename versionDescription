@@ -1,0 +1,15 @@
+this version is a milestone.
+
+The basic funtions of this version have been tested and worked well.
+
+For the simulated scenario, several junctions located at the corner of the scenario.
+
+when row=4 and col=3
+
+the first row street intersects with the first column street at the first junction, the position of which is 0,0
+the first row street intersects with the last  column street at the col+1th junction, the position of which is 0, maxy.
+
+However, next version will make the junctions on the boundary of the scenario to be invisiable and NOT include in the valid
+junctions that vehicular will traverse through.
+
+
