@@ -5,3 +5,9 @@ when set delay time, the dalay value is linear increase with the distance betwee
 bug exists
 
    when no additional nodes between nodes located at junctions, the layout is a little disorder.
+   
+  
+  
+  I have no idea with the rate that make the following formulation success
+     
+        rate * dist(jm,jn) = delay(jm,jn)
