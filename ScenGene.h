@@ -83,6 +83,7 @@ private:
 	string  	baseFile;
 	string  	wiredFile;
 	string		patternFile;
+	string		scenFile;
 
 //parse----------------------para & value
 	string		current_line;
@@ -102,11 +103,18 @@ private:
 	int  wired_junc_only;
 	double wired_xdist_base;
 	double wired_ydist_base;
-
+	int  wired_boundary_valid_bits;
+	double delay_rate;
 
 
 //inner variables----------------------------
 	int vehibases_num;
+	int base_num;
+	int x_add_nodes;
+	int y_add_nodes;
+	double mini_dist_rate;
+	double dist_Xx_add_nodes;
+	double dist_Yy_add_nodes;
 
 //	ofstream file_handle;
 private:
@@ -142,6 +150,7 @@ private:
 	void baseStationTCL(string);
 	void wiredNodeTCL(string);
 	void patternTCL(string);
+	void scenarioXML(string);
 
 	bool check_valid(int,int,int);
 	void parseJunc(char*, int[]);
@@ -162,6 +171,7 @@ public:
 	void file_bastcl();
 	void file_wirtcl();
 	void file_pattcl();
+	void file_scexml();
 
 
 };
