@@ -1,0 +1,7 @@
+this version is make it clear that the wired linkage work well.
+
+when set delay time, the dalay value is linear increase with the distance between two wired nodes.
+
+bug exists
+
+   when no additional nodes between nodes located at junctions, the layout is a little disorder.
