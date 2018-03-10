@@ -39,14 +39,16 @@ private:
 	int			edge_lane_num;
 	int			edge_bidirection_bits;
 	int			edge_connect_bits;
+	double		edge_lane_width;
+	double		edge_speed_limit;
 //route-----------------types of vehicular & trips & vehicle path
 	string		route_vtypes_prefix;
 	int			route_vtypes_num;
 	double		route_vtypes_accel[2];
 	double		route_vtypes_decel[2];
-	int			route_vtypes_length[2];
+	double		route_vtypes_length[2];
 	double		route_vtypes_maxspeed;
-	int			route_vtypes_width[2];
+	double		route_vtypes_width[2];
 	double		route_vtypes_sigma[2];
 
 
@@ -67,6 +69,7 @@ private:
 	int			route_vehi_routes;// derived from route_trip_num
 	int			route_vehi_depart;// poisson distribution
 	int			route_vehi_color_bits;
+	string		route_vehi_departLane;
 
 //Poisson distribution--------------------lambda
 	int			lambda;
@@ -83,6 +86,7 @@ private:
 	string  	baseFile;
 	string  	wiredFile;
 	string		patternFile;
+	string		scenFile;
 
 //parse----------------------para & value
 	string		current_line;
@@ -102,11 +106,18 @@ private:
 	int  wired_junc_only;
 	double wired_xdist_base;
 	double wired_ydist_base;
-
+	int  wired_boundary_valid_bits;
+	double delay_rate;
 
 
 //inner variables----------------------------
 	int vehibases_num;
+	int base_num;
+	int x_add_nodes;
+	int y_add_nodes;
+	double mini_dist_rate;
+	double dist_Xx_add_nodes;
+	double dist_Yy_add_nodes;
 
 //	ofstream file_handle;
 private:
@@ -142,6 +153,7 @@ private:
 	void baseStationTCL(string);
 	void wiredNodeTCL(string);
 	void patternTCL(string);
+	void scenarioXML(string);
 
 	bool check_valid(int,int,int);
 	void parseJunc(char*, int[]);
@@ -162,6 +174,7 @@ public:
 	void file_bastcl();
 	void file_wirtcl();
 	void file_pattcl();
+	void file_scexml();
 
 
 };
