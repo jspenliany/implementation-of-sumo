@@ -12,3 +12,5 @@ the *.conf  file is intended to save the parameters for building up a vanet scen
 
 
 the branch of 18031201 is another milestone since make the layout of all nodes shown in nam matched perfectly and fix some bugs of the early versions.
+
+The above layout matched in nam result from having no idea about the relationship between the link delay value and the link length.
