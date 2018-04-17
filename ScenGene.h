@@ -70,6 +70,7 @@ private:
 	int			route_vehi_depart;// poisson distribution
 	int			route_vehi_color_bits;
 	string		route_vehi_departLane;
+	string		route_vehi_departSpeed;
 
 //Poisson distribution--------------------lambda
 	int			lambda;
@@ -118,6 +119,8 @@ private:
 	double mini_dist_rate;
 	double dist_Xx_add_nodes;
 	double dist_Yy_add_nodes;
+
+	bool  rand_order;
 
 //-------------experimental data, abstracted from Two examples of simulations to debug the show of nam ------------------
 	double miniAxisStepA;
