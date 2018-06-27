@@ -8,11 +8,14 @@
 #ifndef SCENGENE_H_
 #define SCENGENE_H_
 
+#include "PathGene.h"
 #include <fstream>
 #include <string>
 #include <iostream>
 
 using namespace std;
+
+
 
 class ScenGene{
 private:
@@ -34,6 +37,7 @@ private:
 	int			node_junc_type;
 	int			node_base_station_start;
 	double		node_junc_width;
+	double		node_drift_rate;
 //edge----------------------streets & lanes &  links
 	string		edge_prefix;
 	int			edge_lane_num;
@@ -50,6 +54,7 @@ private:
 	double		route_vtypes_maxspeed;
 	double		route_vtypes_width[2];
 	double		route_vtypes_sigma[2];
+	double		route_vtypes_minGap;
 
 
 	string		route_trip_prefix;
@@ -70,9 +75,25 @@ private:
 	int			route_vehi_depart;// poisson distribution
 	int			route_vehi_color_bits;
 	string		route_vehi_departLane;
+	string		route_vehi_departSpeed;
 
 //Poisson distribution--------------------lambda
 	int			lambda;
+
+
+
+//flow --------------------
+	string		flow_pre;
+	int			flow_end;
+	double		vehi_emit_p;
+	bool		flow_flag;
+	int			flow_num;
+
+	int			veh_kinds;
+	double		bus_rate;
+	double		scar_rate;
+	double		texi_rate;
+	double		other_rate;
 
 //I/O-----------------files specification
 	string		confFile;
@@ -87,6 +108,8 @@ private:
 	string  	wiredFile;
 	string		patternFile;
 	string		scenFile;
+	string		lengFile;
+	string		spathFile;
 
 //parse----------------------para & value
 	string		current_line;
@@ -108,6 +131,7 @@ private:
 	double wired_ydist_base;
 	int  wired_boundary_valid_bits;
 	double delay_rate;
+	bool wired_delay_show_flag;
 
 
 //inner variables----------------------------
@@ -119,6 +143,16 @@ private:
 	double dist_Xx_add_nodes;
 	double dist_Yy_add_nodes;
 
+	bool  rand_order;
+
+	PathGene *spg;
+	int bus_num;
+	int scar_num;
+	int texi_num;
+	int other_num;
+	int route_shortest_path_num;
+	int route_loop_path_num;
+
 //-------------experimental data, abstracted from Two examples of simulations to debug the show of nam ------------------
 	double miniAxisStepA;
 	double maxiAxisStepB;
@@ -129,6 +163,15 @@ private:
 	double precise_junc_delayY;
 	double precise_base_delayX;
 	double precise_base_delayY;
+
+
+
+	double UPlengthJuncIJ[20][20];
+	double RIGHTlengthJuncIJ[20][20];
+	double UPangelJuncIJ[20][20];
+	double RIGHTangelJuncIJ[20][20];
+
+
 //	ofstream file_handle;
 private:
 
@@ -139,6 +182,7 @@ private:
 	void routePara(int);
 	void filePara(int);
 	void wiredPara(int);
+	void flowPara(int);
 
 
 	void edge_id(int,int,int,int);
@@ -164,6 +208,8 @@ private:
 	void wiredNodeTCL(string);
 	void patternTCL(string);
 	void scenarioXML(string);
+	void roadLengthXML(string);
+	void shortpathTCL(string);
 
 	bool check_valid(int,int,int);
 	void parseJunc(char*, int[]);
@@ -171,7 +217,8 @@ private:
 	void generatePoisson(int[]);
 	int  poissonNextElement();
 
-
+	void InitshortestPath();
+	void shortestPath(int,int,int,int,int[]);
 
 
 public:
@@ -185,7 +232,11 @@ public:
 	void file_wirtcl();
 	void file_pattcl();
 	void file_scexml();
+	void file_lenxml();
 
+	void file_NODExml();
+	void file_ROUTExml();
+	void file_SPATHtcl();
 
 };
 
